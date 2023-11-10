@@ -346,13 +346,13 @@ cd
 cat > /etc/cron.d/re_otm <<-END
 SHELL=/bin/sh
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-0 7 * * * root /sbin/reboot
+0 1 * * * root /sbin/reboot
 END
 
 cat > /etc/cron.d/clean_otm <<-END
 SHELL=/bin/sh
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-*/20 * * * root /sbin/logcleaner
+*/5 * * * root /sbin/logcleaner
 END
 
 cat > /etc/cron.d/xp_otm <<-END
@@ -362,7 +362,7 @@ PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 END
 
 cat > /home/re_otm <<-END
-7
+1
 END
 
 service cron restart >/dev/null 2>&1
