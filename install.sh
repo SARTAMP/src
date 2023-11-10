@@ -234,21 +234,21 @@ read -rp "Input domain : " -e pp
 echo -e "\e[33m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
 echo -e "$green           INSTALL SSH / WS               $NC"
 echo -e "\e[33m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-sleep 2
+sleep 0.5
 clear
-wget https://raw.githubusercontent.com/SARTAMP/src/main/ssh/ssh-vpn.sh && chmod +x ssh-vpn.sh && screen -S ssh-vpn ./ssh-vpn.sh
+wget https://raw.githubusercontent.com/SARTAMP/src/main/ssh/ssh-vpn.sh && chmod +x ssh-vpn.sh && ./ssh-vpn.sh
 #Instal Xray
 echo -e "\e[33m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
 echo -e "$green             INSTALL XRAY              $NC"
 echo -e "\e[33m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-sleep 2
+sleep 0.5
 clear
 wget https://raw.githubusercontent.com/SARTAMP/src/main/xray/ins-xray.sh && chmod +x ins-xray.sh && ./ins-xray.sh
 wget https://raw.githubusercontent.com/SARTAMP/src/main/sshws/insshws.sh && chmod +x insshws.sh && ./insshws.sh
 echo -e "\e[33m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
 echo -e "$green            YOGZVPN STORE              $NC"
 echo -e "\e[33m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-sleep 2
+sleep 0.5
 clear
 #install ohp
 clear
@@ -299,8 +299,7 @@ TRX="
 <i>Notifikasi Via BOT</i>
 <b>Tele : @YSSHstore</b>
 "
-curl -s --max-time $TIMES -d "chat_id=$CHATID&disable_web_page_preview=1&text=$TEXT&parse_mode=html" $URL
-clear
+
 curl -s --max-time $TIMES -d "chat_id=$ID&disable_web_page_preview=1&text=$TRX&parse_mode=html" $URL
 clear
 curl -sS ifconfig.me > /etc/myipvps
