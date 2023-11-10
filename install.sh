@@ -214,36 +214,21 @@ clear
 wget -q https://raw.githubusercontent.com/SARTAMP/src/main/tools.sh;chmod +x tools.sh;./tools.sh
 rm tools.sh
 clear
-echo -e "   .----------------------------------."
-echo -e "   |\e[1;32mPlease Select a Domain Type Below \e[0m|"
-echo -e "   '----------------------------------'"
-echo -e "     \e[1;32m1)\e[0m Pakai Domain Sendiri"
-echo -e "     \e[1;32m2)\e[0m Pakai Domain Random Dari Script"
-echo -e "   ------------------------------------"
-read -p "   Please select number 1-2 or Any Button(Random) : " host
-echo ""
-if [[ $host == "1" ]]; then
-echo -e "\e[1;32mPlease Enter Your Subdomain $NC"
-read -rp "Input domain : " -e host
-    if [ -z $host ]; then
-    echo "$host" > /root/scdomain
-	echo "$host" > /etc/xray/scdomain
-	echo "$host" > /etc/xray/domain
-	echo "$host" > /etc/v2ray/domain
-	echo $host > /root/domain
-    echo "IP=$host" > /var/lib/scrz-prem/ipvps.conf
-    echo ""
-elif [[ $host == "2" ]]; then
-#install cf
-wget https://raw.githubusercontent.com/SARTAMP/src/main/ssh/cf.sh && chmod +x cf.sh && ./cf.sh
-rm -f /root/cf.sh
-clear
-else
-print_install "Random Subdomain/Domain is Used"
-wget wget https://raw.githubusercontent.com/SARTAMP/src/main/ssh/cf.sh && chmod +x cf.sh && ./cf.sh
-rm -f /root/cf.sh
-clear
-fi
+yellow "Add Domain for vmess/vless/trojan dll"
+echo " "
+read -rp "Input domain : " -e pp
+    if [ -z $pp ]; then
+        echo -e "
+        Nothing input for domain!
+        Then a random domain will be created"
+    else
+        echo "$pp" > /root/scdomain
+	echo "$pp" > /etc/xray/scdomain
+	echo "$pp" > /etc/xray/domain
+	echo "$pp" > /etc/v2ray/domain
+	echo $pp > /root/domain
+        echo "IP=$pp" > /var/lib/scrz-prem/ipvps.conf
+    fi
     
 #install ssh ovpn
 echo -e "\e[33m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
