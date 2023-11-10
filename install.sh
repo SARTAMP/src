@@ -288,13 +288,12 @@ else
 gg="AM"
 fi
 END
-OWNER="YOGZ"
 TRX="
 <code>INFO MASKU -Transaksi</code>
 <code>────────────────────</code>
 <b>  ⚠️ Install AutoScript ⚠️      </b>
 <code>────────────────────</code>
-<code>🔐Owner   : $OWNER</code>
+<code>🔐Owner   : YOGZstore</code>
 <code>🔐Created : $hariini</code>
 <code>────────────────────</code>
 <i>Notifikasi Via BOT</i>
