@@ -118,8 +118,6 @@ touch /var/log/xray/error2.log
 # / / Ambil Xray Core Version Terbaru
 bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install -u www-data --version 1.5.6
 
-
-
 ## crt xray
 systemctl stop nginx
 mkdir /root/.acme.sh
@@ -149,7 +147,7 @@ cat > /etc/xray/config.json << END
   "log" : {
     "access": "/var/log/xray/access.log",
     "error": "/var/log/xray/error.log",
-    "loglevel": "warning"
+    "loglevel": "info"
   },
   "inbounds": [
       {
@@ -169,7 +167,7 @@ cat > /etc/xray/config.json << END
           "decryption":"none",
             "clients": [
                {
-                 "id": "${uuid}"                 
+                 "id": "${uuid}"
 #vless
              }
           ]
@@ -181,9 +179,9 @@ cat > /etc/xray/config.json << END
           }
         }
      },
-     {
+    {
      "listen": "127.0.0.1",
-     "port": "14017",
+     "port": "23456",
      "protocol": "vmess",
       "settings": {
             "clients": [
@@ -202,11 +200,31 @@ cat > /etc/xray/config.json << END
         }
      },
     {
+     "listen": "127.0.0.1",
+     "port": "28406",
+     "protocol": "vmess",
+      "settings": {
+            "clients": [
+               {
+                 "id": "${uuid}",
+                 "alterId": 0
+#vmess
+             }
+          ]
+       },
+       "streamSettings":{
+         "network": "ws",
+            "wsSettings": {
+                "path": "/worryfree"
+          }
+        }
+     },
+    {
       "listen": "127.0.0.1",
-      "port": "14018",
+      "port": "25432",
       "protocol": "trojan",
       "settings": {
-          "decryption":"none",		
+          "decryption":"none",
            "clients": [
               {
                  "password": "${uuid}"
@@ -223,7 +241,7 @@ cat > /etc/xray/config.json << END
          }
      },
     {
-         "listen": "127.0.0.1",
+        "listen": "127.0.0.1",
         "port": "30300",
         "protocol": "shadowsocks",
         "settings": {
@@ -242,10 +260,10 @@ cat > /etc/xray/config.json << END
                "path": "/ss-ws"
            }
         }
-     },	
+     },
       {
         "listen": "127.0.0.1",
-        "port": "14019",
+     "port": "24456",
         "protocol": "vless",
         "settings": {
          "decryption":"none",
@@ -265,7 +283,7 @@ cat > /etc/xray/config.json << END
      },
      {
       "listen": "127.0.0.1",
-      "port": "14020",
+     "port": "31234",
      "protocol": "vmess",
       "settings": {
             "clients": [
@@ -285,7 +303,7 @@ cat > /etc/xray/config.json << END
      },
      {
         "listen": "127.0.0.1",
-        "port": "14021",
+     "port": "33456",
         "protocol": "trojan",
         "settings": {
           "decryption":"none",
@@ -323,7 +341,7 @@ cat > /etc/xray/config.json << END
            "serviceName": "ss-grpc"
           }
        }
-    }	
+    }
   ],
   "outbounds": [
     {
@@ -398,6 +416,7 @@ cat > /etc/xray/config.json << END
 }
 END
 rm -rf /etc/systemd/system/xray.service.d
+rm -rf /etc/systemd/system/xray@.service
 cat <<EOF> /etc/systemd/system/xray.service
 Description=Xray Service
 Documentation=https://github.com/xtls
@@ -405,7 +424,8 @@ After=network.target nss-lookup.target
 
 [Service]
 User=www-data
-CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_BIND_SERVICE                                 AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE                               AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 NoNewPrivileges=true
 ExecStart=/usr/local/bin/xray run -config /etc/xray/config.json
 Restart=on-failure
@@ -419,7 +439,7 @@ WantedBy=multi-user.target
 EOF
 cat > /etc/systemd/system/runn.service <<EOF
 [Unit]
-Description=Mampus-Anjeng
+Description=yogz
 After=network.target
 
 [Service]
@@ -437,9 +457,11 @@ cat >/etc/nginx/conf.d/xray.conf <<EOF
     server {
              listen 80;
              listen [::]:80;
+             listen 8080;
+             listen [::]:8080;
              listen 443 ssl http2 reuseport;
-             listen [::]:443 http2 reuseport;	
-             server_name $domain;
+             listen [::]:443 http2 reuseport;
+             server_name *.$domain;
              ssl_certificate /etc/xray/xray.crt;
              ssl_certificate_key /etc/xray/xray.key;
              ssl_ciphers EECDH+CHACHA20:EECDH+CHACHA20-draft:EECDH+ECDSA+AES128:EECDH+aRSA+AES128:RSA+AES128:EECDH+ECDSA+AES256:EECDH+aRSA+AES256:RSA+AES256:EECDH+ECDSA+3DES:EECDH+aRSA+3DES:RSA+3DES:!MD5;
@@ -462,7 +484,19 @@ sed -i '$ i}' /etc/nginx/conf.d/xray.conf
 sed -i '$ ilocation = /vmess' /etc/nginx/conf.d/xray.conf
 sed -i '$ i{' /etc/nginx/conf.d/xray.conf
 sed -i '$ iproxy_redirect off;' /etc/nginx/conf.d/xray.conf
-sed -i '$ iproxy_pass http://127.0.0.1:14017;' /etc/nginx/conf.d/xray.conf
+sed -i '$ iproxy_pass http://127.0.0.1:23456;' /etc/nginx/conf.d/xray.conf
+sed -i '$ iproxy_http_version 1.1;' /etc/nginx/conf.d/xray.conf
+sed -i '$ iproxy_set_header X-Real-IP \$remote_addr;' /etc/nginx/conf.d/xray.conf
+sed -i '$ iproxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;' /etc/nginx/conf.d/xray.conf
+sed -i '$ iproxy_set_header Upgrade \$http_upgrade;' /etc/nginx/conf.d/xray.conf
+sed -i '$ iproxy_set_header Connection "upgrade";' /etc/nginx/conf.d/xray.conf
+sed -i '$ iproxy_set_header Host \$http_host;' /etc/nginx/conf.d/xray.conf
+sed -i '$ i}' /etc/nginx/conf.d/xray.conf
+
+sed -i '$ ilocation = /worryfree' /etc/nginx/conf.d/xray.conf
+sed -i '$ i{' /etc/nginx/conf.d/xray.conf
+sed -i '$ iproxy_redirect off;' /etc/nginx/conf.d/xray.conf
+sed -i '$ iproxy_pass http://127.0.0.1:28406;' /etc/nginx/conf.d/xray.conf
 sed -i '$ iproxy_http_version 1.1;' /etc/nginx/conf.d/xray.conf
 sed -i '$ iproxy_set_header X-Real-IP \$remote_addr;' /etc/nginx/conf.d/xray.conf
 sed -i '$ iproxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;' /etc/nginx/conf.d/xray.conf
@@ -474,7 +508,7 @@ sed -i '$ i}' /etc/nginx/conf.d/xray.conf
 sed -i '$ ilocation = /trojan-ws' /etc/nginx/conf.d/xray.conf
 sed -i '$ i{' /etc/nginx/conf.d/xray.conf
 sed -i '$ iproxy_redirect off;' /etc/nginx/conf.d/xray.conf
-sed -i '$ iproxy_pass http://127.0.0.1:14018;' /etc/nginx/conf.d/xray.conf
+sed -i '$ iproxy_pass http://127.0.0.1:25432;' /etc/nginx/conf.d/xray.conf
 sed -i '$ iproxy_http_version 1.1;' /etc/nginx/conf.d/xray.conf
 sed -i '$ iproxy_set_header X-Real-IP \$remote_addr;' /etc/nginx/conf.d/xray.conf
 sed -i '$ iproxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;' /etc/nginx/conf.d/xray.conf
@@ -513,7 +547,7 @@ sed -i '$ iproxy_redirect off;' /etc/nginx/conf.d/xray.conf
 sed -i '$ igrpc_set_header X-Real-IP \$remote_addr;' /etc/nginx/conf.d/xray.conf
 sed -i '$ igrpc_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;' /etc/nginx/conf.d/xray.conf
 sed -i '$ igrpc_set_header Host \$http_host;' /etc/nginx/conf.d/xray.conf
-sed -i '$ igrpc_pass grpc://127.0.0.1:14019;' /etc/nginx/conf.d/xray.conf
+sed -i '$ igrpc_pass grpc://127.0.0.1:24456;' /etc/nginx/conf.d/xray.conf
 sed -i '$ i}' /etc/nginx/conf.d/xray.conf
 
 sed -i '$ ilocation ^~ /vmess-grpc' /etc/nginx/conf.d/xray.conf
@@ -522,7 +556,7 @@ sed -i '$ iproxy_redirect off;' /etc/nginx/conf.d/xray.conf
 sed -i '$ igrpc_set_header X-Real-IP \$remote_addr;' /etc/nginx/conf.d/xray.conf
 sed -i '$ igrpc_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;' /etc/nginx/conf.d/xray.conf
 sed -i '$ igrpc_set_header Host \$http_host;' /etc/nginx/conf.d/xray.conf
-sed -i '$ igrpc_pass grpc://127.0.0.1:14020;' /etc/nginx/conf.d/xray.conf
+sed -i '$ igrpc_pass grpc://127.0.0.1:31234;' /etc/nginx/conf.d/xray.conf
 sed -i '$ i}' /etc/nginx/conf.d/xray.conf
 
 sed -i '$ ilocation ^~ /trojan-grpc' /etc/nginx/conf.d/xray.conf
@@ -531,7 +565,7 @@ sed -i '$ iproxy_redirect off;' /etc/nginx/conf.d/xray.conf
 sed -i '$ igrpc_set_header X-Real-IP \$remote_addr;' /etc/nginx/conf.d/xray.conf
 sed -i '$ igrpc_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;' /etc/nginx/conf.d/xray.conf
 sed -i '$ igrpc_set_header Host \$http_host;' /etc/nginx/conf.d/xray.conf
-sed -i '$ igrpc_pass grpc://127.0.0.1:14021;' /etc/nginx/conf.d/xray.conf
+sed -i '$ igrpc_pass grpc://127.0.0.1:33456;' /etc/nginx/conf.d/xray.conf
 sed -i '$ i}' /etc/nginx/conf.d/xray.conf
 
 sed -i '$ ilocation ^~ /ss-grpc' /etc/nginx/conf.d/xray.conf
@@ -544,23 +578,18 @@ sed -i '$ igrpc_pass grpc://127.0.0.1:30310;' /etc/nginx/conf.d/xray.conf
 sed -i '$ i}' /etc/nginx/conf.d/xray.conf
 
 
-sleep 1
-echo -e "[ ${green}INFO$NC ] Installing bbr.."
-#wget -q -O /usr/bin/bbr "https://raw.githubusercontent.com/SARTAMP/src/main/ssh/bbr.sh"
-#chmod +x /usr/bin/bbr
-#bbr >/dev/null 2>&1
-#rm /usr/bin/bbr >/dev/null 2>&1
 echo -e "$yell[SERVICE]$NC Restart All service"
 systemctl daemon-reload
-sleep 1
+sleep 0.5
 echo -e "[ ${green}ok${NC} ] Enable & restart xray "
+systemctl daemon-reload
 systemctl enable xray
 systemctl restart xray
 systemctl restart nginx
 systemctl enable runn
 systemctl restart runn
 
-sleep 1
+sleep 0.5
 wget -q -O /usr/bin/add-ws "https://raw.githubusercontent.com/SARTAMP/src/main/xray/add-ws.sh" && chmod +x /usr/bin/add-ws
 wget -q -O /usr/bin/add-vless "https://raw.githubusercontent.com/SARTAMP/src/main/xray/add-vless.sh" && chmod +x /usr/bin/add-vless
 wget -q -O /usr/bin/add-tr "https://raw.githubusercontent.com/SARTAMP/src/main/xray/add-tr.sh" && chmod +x /usr/bin/add-tr
@@ -568,12 +597,10 @@ wget -q -O /usr/bin/del-user "https://raw.githubusercontent.com/SARTAMP/src/main
 wget -q -O /usr/bin/renew-ws "https://raw.githubusercontent.com/SARTAMP/src/main/xray/renew-ws.sh" && chmod +x /usr/bin/renew-ws
 wget -q -O /usr/bin/crtv2ray "https://raw.githubusercontent.com/SARTAMP/src/main/xray/crt.sh" && chmod +x /usr/bin/crtv2ray
 wget -q -O /usr/bin/add-ssws "https://raw.githubusercontent.com/SARTAMP/src/main/xray/add-ssws.sh" && chmod +x /usr/bin/add-ssws
-sleep 1
+sleep 0.5
 yellow() { echo -e "\\033[33;1m${*}\\033[0m"; }
 yellow "xray/Vmess"
 yellow "xray/Vless"
-
-
 
 mv /root/domain /etc/xray/ 
 if [ -f /root/scdomain ];then
