@@ -60,6 +60,30 @@ systemctl start rc-local.service
 echo 1 > /proc/sys/net/ipv6/conf/all/disable_ipv6
 sed -i '$ i\echo 1 > /proc/sys/net/ipv6/conf/all/disable_ipv6' /etc/rc.local
 
+#update
+apt update -y
+apt upgrade -y
+apt dist-upgrade -y
+apt-get remove --purge ufw firewalld -y
+apt-get remove --purge exim4 -y
+
+#install python
+apt install python -y
+
+#install jq
+apt -y install jq
+
+#install shc
+apt -y install shc
+
+# install wget and curl
+apt -y install wget curl
+
+#figlet
+apt-get install figlet -y
+apt-get install ruby -y
+gem install lolcat
+
 # set time GMT +7
 ln -fs /usr/share/zoneinfo/Asia/Jakarta /etc/localtime
 
