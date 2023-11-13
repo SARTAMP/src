@@ -133,6 +133,7 @@ osslh=$(systemctl status sslh | grep Active | awk '{print $3}' | cut -d "(" -f2 
 ohp=$(systemctl status dropbear-ohp | grep Active | awk '{print $3}' | cut -d "(" -f2 | cut -d ")" -f1)
 ohq=$(systemctl status openvpn-ohp | grep Active | awk '{print $3}' | cut -d "(" -f2 | cut -d ")" -f1)
 ohr=$(systemctl status ssh-ohp | grep Active | awk '{print $3}' | cut -d "(" -f2 | cut -d ")" -f1)
+badvpn=$(systemctl status badvpn | grep Active | awk '{print $3}' | cut -d "(" -f2 | cut -d ")" -f1)
 
 # COLOR VALIDATION
 RED='\033[0;31m'
@@ -348,36 +349,18 @@ else
    swsopen="${RED}  Not Running ${NC}  ( Error )${NC}"
 fi
 
+if [[ $badvpn == "running" ]]; then 
+   status_badvpn=" ${GREEN}Running ${NC}( No Error )${NC}" 
+else
+   status_badvpn="${RED}  Not Running ${NC}  ( Error )${NC}"
+fi
+
 # TOTAL RAM
 total_ram=` grep "MemTotal: " /proc/meminfo | awk '{ print $2}'`
 totalram=$(($total_ram/1024))
 
-# TIPE PROCESSOR
-#totalcore="$(grep -c "^processor" /proc/cpuinfo)" 
-#totalcore+=" Core"
-#corediilik="$(grep -c "^processor" /proc/cpuinfo)" 
-#tipeprosesor="$(awk -F ': | @' '/model name|Processor|^cpu model|chip type|^cpu type/ {
-  #                      printf $2;
-      #                  exit
-    #                    }' /proc/cpuinfo)"
-
-# GETTING CPU INFORMATION
-#cpu_usage1="$(ps aux | awk 'BEGIN {sum=0} {sum+=$3}; END {print sum}')"
-#cpu_usage="$((${cpu_usage1/\.*} / ${corediilik:-1}))"
-#cpu_usage+=" %"
-
-# OS UPTIME
-#uptime="$(uptime -p | cut -d " " -f 2-10)"
-
 # KERNEL TERBARU
 kernelku=$(uname -r)
-
-# WAKTU SEKARANG 
-#harini=`date -d "0 days" +"%d-%m-%Y"`
-#jam=`date -d "0 days" +"%X"`
-
-# DNS PATCH
-#tipeos2=$(uname -m)
 
 # GETTING DOMAIN NAME
 Domen="$(cat /etc/xray/domain)"
@@ -387,10 +370,6 @@ echo -e "\E[41;1;39m              ⇱ Sytem Information ⇲             \E[0m"
 echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m${NC}"
 echo -e "  Hostname   : $HOSTNAME"
 echo -e "  OS Name    : $Tipe"
-#echo -e "Processor   : $tipeprosesor"
-#echo -e "Proc Core   :$totalcore"
-#echo -e "Virtual     :$typevps"
-#echo -e "Cpu Usage   :$cpu_usage"
 echo -e "  Total RAM   : ${totalram}MB"
 echo -e "  Public IP   : $MYIP"
 echo -e "  Domain      : $Domen"
@@ -403,7 +382,7 @@ echo -e "  Version     : Beta Version"
 echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m${NC}"
 echo -e "\E[41;1;39m            ⇱ Service Information ⇲             \E[0m"
 echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m${NC}"
-echo -e "  SSH WS & WSS              :$status_ssh"
+echo -e "  SSH WS & WSS            :$status_ssh"
 echo -e "  OpenVPN                 :$status_openvpn"
 echo -e "  Dropbear                :$status_beruangjatuh"
 echo -e "  Squid                   :$status_squid"
@@ -418,6 +397,7 @@ echo -e "  Shadowsocks-R           :$status_ssh"
 echo -e "  Shadowsocks-OBFS HTTPS  :$status_ssh"
 echo -e "  Shadowsocks-OBFS HTTP   :$status_ssh"
 echo -e "  XRAYS Trojan            :$status_virus_trojan"
+echo -e "  Badvpn Updgw            :$status_badvpn"
 echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m${NC}"
 echo ""
 read -n 1 -s -r -p "Klik Enter Untuk Kembali Ke menu"
