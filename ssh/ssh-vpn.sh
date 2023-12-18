@@ -299,7 +299,7 @@ wget -O add-host "https://raw.githubusercontent.com/SARTAMP/src/main/ssh/add-hos
 wget -O speedtest "https://raw.githubusercontent.com/SARTAMP/src/main/ssh/speedtest_cli.py"
 wget -O xp "https://raw.githubusercontent.com/SARTAMP/src/main/ssh/xp.sh"
 wget -O asu "https://raw.githubusercontent.com/SARTAMP/src/main/asu.sh"
-wget -O menu "https://raw.githubusercontent.com/SARTAMP/src/main/menu.sh"
+wget -O menu "https://raw.githubusercontent.com/SARTAMP/src/main/menu_all/menu.sh"
 wget -O sshws "https://raw.githubusercontent.com/SARTAMP/src/main/ssh/sshws.sh"
 wget -O trial "https://raw.githubusercontent.com/SARTAMP/src/main/ssh/trial.sh"
 wget -O ssh-menu "https://raw.githubusercontent.com/SARTAMP/src/main/menu_all/ssh-menu.sh"
