@@ -1,9 +1,10 @@
 #!/bin/bash
 #
 # ==================================================
+
 # initializing var
 export DEBIAN_FRONTEND=noninteractive
-MYIP=$(curl -sS ipv4.icanhazip.com);
+MYIP=$(wget -qO- ipinfo.io/ip);
 MYIP2="s/xxxxxxxxx/$MYIP/g";
 NET=$(ip -o $ANU -4 route show to default | awk '{print $5}');
 source /etc/os-release
@@ -12,11 +13,11 @@ ver=$VERSION_ID
 #detail nama perusahaan
 country=ID
 state=Indonesia
-locality=Jakarta
+locality=none
 organization=none
 organizationalunit=none
 commonname=none
-email=none
+email=admin@bahenol
 
 # simple password minimal
 curl -sS https://raw.githubusercontent.com/SARTAMP/src/main/ssh/password | openssl aes-256-cbc -d -a -pass pass:scvps07gg -pbkdf2 > /etc/pam.d/common-password
@@ -87,6 +88,10 @@ gem install lolcat
 # set time GMT +7
 ln -fs /usr/share/zoneinfo/Asia/Jakarta /etc/localtime
 
+# set locale
+sed -i 's/AcceptEnv/#AcceptEnv/g' /etc/ssh/sshd_config
+
+
 install_ssl(){
     if [ -f "/usr/bin/apt-get" ];then
             isDebian=`cat /etc/issue|grep Debian`
@@ -132,47 +137,47 @@ mkdir -p /home/vps/public_html
 
 # install badvpn
 cd
-wget -O /usr/sbin/badvpn "https://raw.githubusercontent.com/casper9/script/main/badvpn" >/dev/null 2>&1
-chmod +x /usr/sbin/badvpn > /dev/null 2>&1
-wget -q -O /etc/systemd/system/badvpn1.service "https://raw.githubusercontent.com/casper9/script/main/badvpn1.service" >/dev/null 2>&1
-wget -q -O /etc/systemd/system/badvpn2.service "https://raw.githubusercontent.com/casper9/script/main/badvpn2.service" >/dev/null 2>&1
-wget -q -O /etc/systemd/system/badvpn3.service "https://raw.githubusercontent.com/casper9/script/main/badvpn3.service" >/dev/null 2>&1
-systemctl disable badvpn1 
-systemctl stop badvpn1 
-systemctl enable badvpn1
-systemctl start badvpn1 
-systemctl disable badvpn2 
-systemctl stop badvpn2 
-systemctl enable badvpn2
-systemctl start badvpn2 
-systemctl disable badvpn3 
-systemctl stop badvpn3 
-systemctl enable badvpn3
-systemctl start badvpn3 
+wget -O /usr/bin/badvpn-udpgw "https://raw.githubusercontent.com/SARTAMP/src/main/ssh/newudpgw"
+chmod +x /usr/bin/badvpn-udpgw
+sed -i '$ i\screen -dmS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7100 --max-clients 500' /etc/rc.local
+sed -i '$ i\screen -dmS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7200 --max-clients 500' /etc/rc.local
+sed -i '$ i\screen -dmS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7300 --max-clients 500' /etc/rc.local
+screen -dmS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7100 --max-clients 500
+screen -dmS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7200 --max-clients 500
+screen -dmS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7300 --max-clients 500
+screen -dmS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7400 --max-clients 500
+screen -dmS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7500 --max-clients 500
+screen -dmS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7600 --max-clients 500
+screen -dmS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7700 --max-clients 500
+screen -dmS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7800 --max-clients 500
+screen -dmS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7900 --max-clients 500
 
 # setting port ssh
 cd
-sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config
+sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g'
+# /etc/ssh/sshd_config
 sed -i '/Port 22/a Port 500' /etc/ssh/sshd_config
 sed -i '/Port 22/a Port 40000' /etc/ssh/sshd_config
 sed -i '/Port 22/a Port 51443' /etc/ssh/sshd_config
 sed -i '/Port 22/a Port 58080' /etc/ssh/sshd_config
-sed -i '/Port 22/a Port 53' /etc/ssh/sshd_config
-sed -i '/Port 22/a Port 22' /etc/ssh/sshd_config
+sed -i '/Port 22/a Port 200' /etc/ssh/sshd_config
+sed -i 's/#Port 22/Port 22/g' /etc/ssh/sshd_config
 /etc/init.d/ssh restart
 
-cd
+echo "=== Install Dropbear ==="
+# install dropbear
+#apt -y install dropbear
 sed -i 's/NO_START=1/NO_START=0/g' /etc/default/dropbear
 sed -i 's/DROPBEAR_PORT=22/DROPBEAR_PORT=143/g' /etc/default/dropbear
-sed -i 's/DROPBEAR_EXTRA_ARGS=/#DROPBEAR_EXTRA_ARGS=/g' /etc/default/dropbear
-sed -i '/arguments for Dropbear/a DROPBEAR_EXTRA_ARGS="-p 50000 -p 109 -p 110 -p 69"' /etc/default/dropbear
+sed -i 's/DROPBEAR_EXTRA_ARGS=/DROPBEAR_EXTRA_ARGS="-p 50000 -p 109 -p 110 -p 69"/g' /etc/default/dropbear
 echo "/bin/false" >> /etc/shells
 echo "/usr/sbin/nologin" >> /etc/shells
 /etc/init.d/ssh restart
 /etc/init.d/dropbear restart
 
-# install stunnel
 cd
+# install stunnel
+#apt install stunnel4 -y
 cat > /etc/stunnel/stunnel.conf <<-END
 cert = /etc/stunnel/stunnel.pem
 client = no
@@ -181,19 +186,19 @@ socket = l:TCP_NODELAY=1
 socket = r:TCP_NODELAY=1
 
 [dropbear]
-accept = 8880
+accept = 222
 connect = 127.0.0.1:22
 
 [dropbear]
-accept = 8443
+accept = 777
 connect = 127.0.0.1:109
 
 [ws-stunnel]
-accept = 444
+accept = 2096
 connect = 700
 
 [openvpn]
-accept = 990
+accept = 442
 connect = 127.0.0.1:1194
 
 END
@@ -208,29 +213,9 @@ cat key.pem cert.pem >> /etc/stunnel/stunnel.pem
 sed -i 's/ENABLED=0/ENABLED=1/g' /etc/default/stunnel4
 /etc/init.d/stunnel4 restart
 
-#OpenVPN
-cd
-wget https://raw.githubusercontent.com/casper9/script/main/vpn.sh &&  chmod +x vpn.sh && ./vpn.sh
 
-#slowdns
-cd
-wget https://raw.githubusercontent.com/casper9/script/main/installsl.sh && chmod +x installsl.sh && ./installsl.sh
-
-#udpcostum
-cd
-wget https://raw.githubusercontent.com/SARTAMP/src/main/udp/udp-custom.sh && chmod +x udp-custom.sh && ./udp-custom.sh
-
-# // install lolcat
-wget https://raw.githubusercontent.com/casper9/script/main/lolcat.sh &&  chmod +x lolcat.sh && ./lolcat.sh
-
-# memory swap 10gb
-cd
-dd if=/dev/zero of=/swapfile bs=1024 count=5242880
-mkswap /swapfile
-chown root:root /swapfile
-chmod 0600 /swapfile >/dev/null 2>&1
-swapon /swapfile >/dev/null 2>&1
-sed -i '$ i\/swapfile      swap swap   defaults    0 0' /etc/fstab
+# install fail2ban
+apt -y install fail2ban
 
 # Instal DDOS Flate
 if [ -d '/usr/local/ddos' ]; then
@@ -260,16 +245,32 @@ echo 'Config file is at /usr/local/ddos/ddos.conf'
 echo 'Please send in your comments and/or suggestions to zaf@vsnl.com'
 
 # banner /etc/issue.net
-echo "Banner /etc/issue.net" >>/etc/ssh/sshd_config
+sleep 1
+echo -e "[ ${green}INFO$NC ] Settings banner"
+wget -q -O /etc/issue.net "https://raw.githubusercontent.com/SARTAMP/src/main/issue.net"
+chmod +x /etc/issue.net
+echo "Banner /etc/issue.net" >> /etc/ssh/sshd_config
 sed -i 's@DROPBEAR_BANNER=""@DROPBEAR_BANNER="/etc/issue.net"@g' /etc/default/dropbear
-
-# Ganti Banner
-wget -O /etc/issue.net "https://raw.githubusercontent.com/casper9/script/main/issue.net"
-
+cat> /etc/issue.net << END
+<p style="text-align:center"> <font color='#FF0059'>▬</font><font color='#F1006F'>▬</font><font
+color='#E30085'>▬</font><font color='#D6009B'>▬</font><font color='#C800B1'>▬</font><font
+color='#BB00C7'>ஜ</font><font color='#AD00DD'>۩</font><font color='#9F00F3'>۞</font><font
+color='#9F00F3'>۩</font><font color='#AD00DD'>ஜ</font><font color='#BB00C7'>▬</font><font
+color='#C800B1'>▬</font><font color='#D6009B'>▬</font><font color='#E30085'>▬</font><font
+color='#F1006F'>▬</font><br> <font color="#F5FE00"><b> --- 卍 PREMIUM VVIP 卐 --- </b></font><br> <font
+color='red'>! PERATURAN SERVER !</font><br> <font color='#20CDCC'><b> NO DDOS </b></font><br> <font
+color='#10C7E5'><b> NO SPAMING </b></font><br> <font color='#00C1FF'><b> NO HACKING AND CARDING </b></font><br> 
+<font color="#E51369"><b> NO TORRENT!!  </b> </font><br> <font color="#483D8B"><b> ORDER PREMIUM : wa.me/6281215360549</br> </font><br> <font color="#483D8B"><b></br></font><br> <font color='#FF0059'>▬</font><font color='#F1006F'>▬</font><font
+color='#E30085'>▬</font><font color='#D6009B'>▬</font><font color='#C800B1'>▬</font><font
+color='#BB00C7'>ஜ</font><font color='#AD00DD'>۩</font><font color='#9F00F3'>۞</font><font
+color='#9F00F3'>۩</font><font color='#AD00DD'>ஜ</font><font color='#BB00C7'>▬</font><font
+color='#C800B1'>▬</font><font color='#D6009B'>▬</font><font color='#E30085'>▬</font><font
+color='#F1006F'>▬</font>
+END
 #install bbr dan optimasi kernel
 wget https://raw.githubusercontent.com/SARTAMP/src/main/ssh/bbr.sh && chmod +x bbr.sh && ./bbr.sh
 
-# blokir torrent
+# blockir torrent
 iptables -A FORWARD -m string --string "get_peers" --algo bm -j DROP
 iptables -A FORWARD -m string --string "announce_peer" --algo bm -j DROP
 iptables -A FORWARD -m string --string "find_node" --algo bm -j DROP
@@ -288,32 +289,32 @@ netfilter-persistent reload
 
 # download script
 cd /usr/bin
-wget -q -O usernew "https://raw.githubusercontent.com/SARTAMP/src/main/ssh/usernew.sh"
-wget -q -O hapus "https://raw.githubusercontent.com/SARTAMP/src/main/ssh/hapus.sh"
-wget -q -O member "https://raw.githubusercontent.com/SARTAMP/src/main/ssh/member.sh"
-wget -q -O renew "https://raw.githubusercontent.com/SARTAMP/src/main/ssh/renew.sh"
-wget -q -O cek "https://raw.githubusercontent.com/SARTAMP/src/main/ssh/cek.sh"
-wget -q -O add-host "https://raw.githubusercontent.com/SARTAMP/src/main/ssh/add-host.sh"
-wget -q -O speedtest "https://raw.githubusercontent.com/SARTAMP/src/main/ssh/speedtest_cli.py"
-wget -q -O xp "https://raw.githubusercontent.com/SARTAMP/src/main/ssh/xp.sh"
-wget -q -O asu "https://raw.githubusercontent.com/SARTAMP/src/main/asu.sh"
-wget -q -O menu "https://raw.githubusercontent.com/SARTAMP/src/main/menu_all/menu.sh"
-wget -q -O sshws "https://raw.githubusercontent.com/SARTAMP/src/main/ssh/sshws.sh"
-wget -q -O trial "https://raw.githubusercontent.com/SARTAMP/src/main/ssh/trial.sh"
-wget -q -O ssh-menu "https://raw.githubusercontent.com/SARTAMP/src/main/menu_all/ssh-menu.sh"
-wget -q -O v2ray-menu "https://raw.githubusercontent.com/SARTAMP/src/main/menu_all/v2ray-menu.sh"
-wget -q -O trojan-menu "https://raw.githubusercontent.com/SARTAMP/src/main/menu_all/trojan-menu.sh"
-wget -q -O ssgrpc-menu "https://raw.githubusercontent.com/SARTAMP/src/main/menu_all/ssgrpc-menu.sh"
-wget -q -O cekws "https://raw.githubusercontent.com/SARTAMP/src/main/xray/cekws.sh"
-wget -q -O about "https://raw.githubusercontent.com/SARTAMP/src/main/ssh/about.sh" 
-wget -q -O running "https://raw.githubusercontent.com/SARTAMP/src/main/ssh/running.sh"
-wget -q -O banner "https://raw.githubusercontent.com/SARTAMP/src/main/banner.sh"
-wget -q -O del-tr "https://raw.githubusercontent.com/SARTAMP/src/main/xray/del-tr.sh"
-wget -q -O trial-menu "https://raw.githubusercontent.com/SARTAMP/src/main/menu_all/trial-menu.sh"
-wget -q -O info-menu "https://raw.githubusercontent.com/SARTAMP/src/main/menu_all/info-menu.sh"
-wget -q -O ceklim "https://raw.githubusercontent.com/SARTAMP/src/main/ssh/ceklim.sh"
-wget -q -O cekusage "https://raw.githubusercontent.com/SARTAMP/src/main/xray/cekusage.sh"
-wget -q -O cekxray "https://raw.githubusercontent.com/SARTAMP/src/main/cekxray.sh"
+wget -O usernew "https://raw.githubusercontent.com/SARTAMP/src/main/ssh/usernew.sh"
+wget -O hapus "https://raw.githubusercontent.com/SARTAMP/src/main/ssh/hapus.sh"
+wget -O member "https://raw.githubusercontent.com/SARTAMP/src/main/ssh/member.sh"
+wget -O renew "https://raw.githubusercontent.com/SARTAMP/src/main/ssh/renew.sh"
+wget -O cek "https://raw.githubusercontent.com/SARTAMP/src/main/ssh/cek.sh"
+wget -O add-host "https://raw.githubusercontent.com/SARTAMP/src/main/ssh/add-host.sh"
+wget -O speedtest "https://raw.githubusercontent.com/SARTAMP/src/main/ssh/speedtest_cli.py"
+wget -O xp "https://raw.githubusercontent.com/SARTAMP/src/main/ssh/xp.sh"
+wget -O asu "https://raw.githubusercontent.com/SARTAMP/src/main/asu.sh"
+wget -O menu "https://raw.githubusercontent.com/SARTAMP/src/main/menu.sh"
+wget -O sshws "https://raw.githubusercontent.com/SARTAMP/src/main/ssh/sshws.sh"
+wget -O trial "https://raw.githubusercontent.com/SARTAMP/src/main/ssh/trial.sh"
+wget -O ssh-menu "https://raw.githubusercontent.com/SARTAMP/src/main/menu_all/ssh-menu.sh"
+wget -O v2ray-menu "https://raw.githubusercontent.com/SARTAMP/src/main/menu_all/v2ray-menu.sh"
+wget -O trojan-menu "https://raw.githubusercontent.com/SARTAMP/src/main/menu_all/trojan-menu.sh"
+wget -O ssgrpc-menu "https://raw.githubusercontent.com/SARTAMP/src/main/menu_all/ssgrpc-menu.sh"
+wget -O cekws "https://raw.githubusercontent.com/SARTAMP/src/main/xray/cekws.sh"
+wget -O about "https://raw.githubusercontent.com/SARTAMP/src/main/ssh/about.sh" 
+wget -O running "https://raw.githubusercontent.com/SARTAMP/src/main/ssh/running.sh"
+wget -O banner "https://raw.githubusercontent.com/SARTAMP/src/main/banner.sh"
+wget -O del-tr "https://raw.githubusercontent.com/SARTAMP/src/main/xray/del-tr.sh"
+wget -O trial-menu "https://raw.githubusercontent.com/SARTAMP/src/main/menu_all/trial-menu.sh"
+wget -O info-menu "https://raw.githubusercontent.com/SARTAMP/src/main/menu_all/info-menu.sh"
+wget -O ceklim "https://raw.githubusercontent.com/SARTAMP/src/main/ssh/ceklim.sh"
+wget -O cekusage "https://raw.githubusercontent.com/SARTAMP/src/main/xray/cekusage.sh"
+wget -O cekxray "https://raw.githubusercontent.com/SARTAMP/src/main/cekxray.sh"
 chmod +x usernew
 chmod +x menu
 chmod +x hapus
@@ -342,31 +343,25 @@ chmod +x cekusage
 chmod +x cekxray
 cd
 
+
 cat > /etc/cron.d/re_otm <<-END
 SHELL=/bin/sh
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-0 0 * * * root /sbin/reboot
-END
-
-cat > /etc/cron.d/clean_otm <<-END
-SHELL=/bin/sh
-PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-*/20 * * * root /sbin/logcleaner
+0 5 * * * root /sbin/reboot
 END
 
 cat > /etc/cron.d/xp_otm <<-END
 SHELL=/bin/sh
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-0 0 * * * root /usr/bin/xp
+2 0 * * * root /usr/bin/xp
 END
 
 cat > /home/re_otm <<-END
-0
+5
 END
 
 service cron restart >/dev/null 2>&1
 service cron reload >/dev/null 2>&1
-service cron start >/dev/null 2>&1
 
 # remove unnecessary files
 sleep 1
@@ -377,39 +372,56 @@ if dpkg -s unscd >/dev/null 2>&1; then
 apt -y remove --purge unscd >/dev/null 2>&1
 fi
 
+# apt-get -y --purge remove samba* >/dev/null 2>&1
+# apt-get -y --purge remove apache2* >/dev/null 2>&1
+# apt-get -y --purge remove bind9* >/dev/null 2>&1
+# apt-get -y remove sendmail* >/dev/null 2>&1
+# apt autoremove -y >/dev/null 2>&1
+# finishing
 cd
 chown -R www-data:www-data /home/vps/public_html
-sleep 0.5
+sleep 1
 echo -e "$yell[SERVICE]$NC Restart All service SSH & OVPN"
 /etc/init.d/nginx restart >/dev/null 2>&1
-sleep 0.5
+sleep 1
 echo -e "[ ${green}ok${NC} ] Restarting nginx"
 /etc/init.d/openvpn restart >/dev/null 2>&1
-sleep 0.5
+sleep 1
 echo -e "[ ${green}ok${NC} ] Restarting cron "
 /etc/init.d/ssh restart >/dev/null 2>&1
-sleep 0.5
+sleep 1
 echo -e "[ ${green}ok${NC} ] Restarting ssh "
 /etc/init.d/dropbear restart >/dev/null 2>&1
-sleep 0.5
+sleep 1
 echo -e "[ ${green}ok${NC} ] Restarting dropbear "
 /etc/init.d/fail2ban restart >/dev/null 2>&1
-sleep 0.5
+sleep 1
 echo -e "[ ${green}ok${NC} ] Restarting fail2ban "
 /etc/init.d/stunnel4 restart >/dev/null 2>&1
-sleep 0.5
+sleep 1
 echo -e "[ ${green}ok${NC} ] Restarting stunnel4 "
 /etc/init.d/vnstat restart >/dev/null 2>&1
-sleep 0.5
+sleep 1
 echo -e "[ ${green}ok${NC} ] Restarting vnstat "
 /etc/init.d/squid restart >/dev/null 2>&1
+
+screen -dmS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7100 --max-clients 500
+screen -dmS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7200 --max-clients 500
+screen -dmS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7300 --max-clients 500
+screen -dmS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7400 --max-clients 500
+screen -dmS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7500 --max-clients 500
+screen -dmS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7600 --max-clients 500
+screen -dmS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7700 --max-clients 500
+screen -dmS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7800 --max-clients 500
+screen -dmS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7900 --max-clients 500
 history -c
 echo "unset HISTFILE" >> /etc/profile
+
 
 rm -f /root/key.pem
 rm -f /root/cert.pem
 rm -f /root/ssh-vpn.sh
 rm -f /root/bbr.sh
-rm -rf /etc/apache2
 
+# finihsing
 clear
