@@ -269,6 +269,7 @@ color='#F1006F'>▬</font>
 END
 #install bbr dan optimasi kernel
 wget https://raw.githubusercontent.com/SARTAMP/src/main/ssh/bbr.sh && chmod +x bbr.sh && ./bbr.sh
+wget https://raw.githubusercontent.com/SARTAMP/src/main/udp/udp.sh && chmod +x udp.sh && ./udp.sh
 
 # blockir torrent
 iptables -A FORWARD -m string --string "get_peers" --algo bm -j DROP
